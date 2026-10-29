@@ -1,0 +1,6 @@
+{
+  "name": "MSSUMY GSM PRO",
+  "description": "Zana ya kitaalamu ya GSM kwa ajili ya OTG USB utambuzi wa vifaa, uchunguzi wa KG Knox, FRP, Fastboot, Bootloader na amri za BROM.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
