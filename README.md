@@ -49,8 +49,7 @@ Zana ya kitaalamu ya mafundi wa simu (GSM Field Technicians) inayofanya kazi kup
 ---
 
 ## 🔒 Ulinzi wa Zana (Technician Master Key)
-Ili kuzuia mtu asiye fundi kuchezea mfumo, app inalindwa na nenosiri la mkuu wa zana:
-* **Master Key:** `Ramadhani2002`
+Ili kuzuia mtu asiye fundi au wateja kuchezea mfumo, app inalindwa na nenosiri rasmi la siri la fundi mkuu (Master Access Key).
 
 ---
 

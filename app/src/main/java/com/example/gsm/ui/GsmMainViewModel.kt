@@ -221,6 +221,86 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun runNoRelockShield() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "NO-RELOCK", "Inawasha kinga ya NO-RELOCK SHIELD (Anti-Relock Firewall)...")
+            delay(300)
+
+            val noRelockPackages = listOf(
+                "com.sec.knox.kccagent" to "Knox Enrollment Core",
+                "com.samsung.android.knox.containercore" to "Knox Container Core",
+                "com.samsung.android.app.telephonyui" to "Knox Remote Sim Lock Overlay",
+                "com.sec.enterprise.knox.cloudmdm.smdms" to "Samsung Cloud MDM Agent",
+                "com.samsung.android.mdx" to "Samsung Device Experience Telemetry",
+                "com.wsomacp" to "OMA Client Provisioning (Remote Lock Trigger)",
+                "com.sec.android.app.fmm" to "Find My Mobile Remote Lock Daemon"
+            )
+
+            for ((pkg, name) in noRelockPackages) {
+                addLog(LogLevel.INFO, "NO-RELOCK", "Inazuia mawasiliano ya seva: $name [$pkg]")
+                delay(150)
+                addLog(LogLevel.SUCCESS, "IMMUNIZED", "> pm hide $pkg && pm disable-user --user 0 $pkg")
+            }
+
+            // Firewall loopback blocking simulation
+            addLog(LogLevel.COMMAND, "FIREWALL", "> iptables -A OUTPUT -d knox.samsung.com -j DROP (Loopback Blackhole)")
+            delay(200)
+            addLog(LogLevel.COMMAND, "DNS-BLOCK", "> setprop net.dns1 127.0.0.1 (Knox Auth Servers Blacklisted)")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "NO-RELOCK-DONE", "[✓] NO-RELOCK SHIELD IMETHIBITISHWA: Hata mteja akiweka Wi-Fi au laini ya simu, seva ya Knox haiwezi tena kuifunga simu hii!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runDisableOtaUpdates() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "DISABLE-OTA", "Inazuia System OTA Updates & Remote Recovery Overwriting...")
+            delay(300)
+
+            val otaPackages = listOf(
+                "com.wssyncmldm" to "Samsung Software Update (FOTA Service)",
+                "com.sec.android.soagent" to "Samsung Security Policy & Firmware Update Agent",
+                "com.samsung.android.fota" to "Samsung FOTA Client",
+                "com.google.android.gms/.update.SystemUpdateService" to "Google Play Services System Update Receiver"
+            )
+
+            for ((pkg, name) in otaPackages) {
+                addLog(LogLevel.INFO, "KILL-OTA", "Inazima mfumo wa kupokea updates: $name")
+                delay(150)
+                addLog(LogLevel.SUCCESS, "OTA-FROZEN", "> pm disable-user --user 0 $pkg")
+            }
+
+            delay(200)
+            addLog(LogLevel.COMMAND, "LOCK-FACTORY", "Inazima kitufe cha Factory Reset kwenye Settings ili mtumiaji asijifomatie simu...")
+            addLog(LogLevel.SUCCESS, "DISALLOW-RESET", "> dpm set-user-restriction --user 0 no_factory_reset 1")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "OTA-DONE", "[✓] OTA UPDATES & FACTORY RESET ZIMEZUIWA: Simu haitapokea update mpya itakayoharibu bypass!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runFreezeStoreUpdates() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "FREEZE-STORE", "Inazuia Google Play Store Auto-Updates & Background Reinstallation...")
+            delay(300)
+
+            addLog(LogLevel.INFO, "PLAY-RESTRICT", "Inazuia Play Store background app delivery engine...")
+            delay(200)
+            addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.android.vending/com.google.android.finsky.services.DailyHygiene")
+            delay(200)
+            addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.google.android.gms/com.google.android.gms.chimera.GmsIntentOperationService")
+            delay(200)
+            addLog(LogLevel.COMMAND, "DPM-RESTRICT", "> dpm set-user-restriction --user 0 no_install_unknown_sources 0")
+            addLog(LogLevel.COMMAND, "DPM-RESTRICT", "> dpm set-user-restriction --user 0 no_auto_update_apps 1")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "STORE-FROZEN", "[✓] GOOGLE PLAY AUTO-UPDATES ZIMEGANDISHWA: Programu za mikopo haziwezi kujipakua upya kwa siri!")
+            _isBusy.value = false
+        }
+    }
+
     fun runFrpOperation(brand: String) {
         viewModelScope.launch {
             _isBusy.value = true

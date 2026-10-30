@@ -306,7 +306,10 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         isBusy = isBusy,
                         onRunKnoxClean = { viewModel.runKnoxClean() },
                         onRunFactoryReset = { viewModel.runFactoryReset() },
-                        onRunRemoveSecurityPlugins = { viewModel.runRemoveSecurityPlugins() }
+                        onRunRemoveSecurityPlugins = { viewModel.runRemoveSecurityPlugins() },
+                        onRunNoRelock = { viewModel.runNoRelockShield() },
+                        onRunDisableOta = { viewModel.runDisableOtaUpdates() },
+                        onRunFreezeStore = { viewModel.runFreezeStoreUpdates() }
                     )
                     2 -> FrpUnlockTab(
                         isBusy = isBusy,
