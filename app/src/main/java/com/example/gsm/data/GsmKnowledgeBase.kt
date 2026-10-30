@@ -139,6 +139,55 @@ object GsmKnowledgeBase {
             category = "Loan Lock (D-Light)",
             adbDisableCommand = "adb shell pm disable-user --user 0 com.dlight.solar.devicecontrol",
             description = "Usimamizi wa mikopo ya vifaa kutoka kampuni ya D-Light."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.palmpay.palmfinance",
+            name = "PalmPay / EasyBuy Finance Agent",
+            category = "Loan Lock (EasyBuy)",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.palmpay.palmfinance",
+            description = "Hufunga simu za Tecno na Infinix baada ya kukosa marejesho ya EasyBuy/PalmPay."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.trustlook.antivirus",
+            name = "Trustlook Hidden MDM Agent",
+            category = "Hidden Spyware / MDM",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.trustlook.antivirus",
+            description = "Huwekwa kisirisiri ndani ya firmware ya simu za mikopo kama kizuizi cha pili cha usalama."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.bboxx.devicecontrol",
+            name = "Bboxx Energy / Smartphone Control",
+            category = "Loan Lock (Bboxx)",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.bboxx.devicecontrol",
+            description = "Hufunga simu zinazouzwa kwa mkopo kupitia kampuni ya Bboxx Solar & Tech."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.mobimate.lockenforcer",
+            name = "MobiMate Device Controller",
+            category = "Loan Lock (MobiMate)",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.mobimate.lockenforcer",
+            description = "Hutumiwa na maduka ya rejareja kuzuia simu isifomatiwe kabla ya kumaliza malipo."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.google.android.apps.work.clouddpc",
+            name = "Google Android Device Policy DPC",
+            category = "Enterprise MDM DPC",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.google.android.apps.work.clouddpc",
+            description = "Device Owner DPC inayotumika na makampuni ya IT kusimamia na kufunga simu kijijini."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.sec.enterprise.knox.cloudmdm.smdms",
+            name = "Samsung Cloud MDM Agent",
+            category = "Knox Cloud MDM",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.sec.enterprise.knox.cloudmdm.smdms",
+            description = "Huwasha upya kufuli ya simu pindi Wi-Fi inapowashwa (Knox Enrollment Service)."
+        ),
+        KnoxPackageInfo(
+            packageName = "com.sec.knox.switcher",
+            name = "Knox Profile Switcher",
+            category = "Knox Guard Core",
+            adbDisableCommand = "adb shell pm disable-user --user 0 com.sec.knox.switcher",
+            description = "Hulazimisha simu kuingia kwenye Profile ya mkopo hata baada ya restart."
         )
     )
 
