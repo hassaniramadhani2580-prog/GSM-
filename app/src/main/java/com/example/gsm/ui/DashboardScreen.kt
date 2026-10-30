@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.Key
@@ -55,6 +56,7 @@ import com.example.R
 import com.example.gsm.ui.tabs.AtTerminalTab
 import com.example.gsm.ui.tabs.BootloaderTab
 import com.example.gsm.ui.tabs.BromEdlTab
+import com.example.gsm.ui.tabs.DiagnosticToolsTab
 import com.example.gsm.ui.tabs.FrpUnlockTab
 import com.example.gsm.ui.tabs.KnoxKgTab
 import com.example.gsm.ui.tabs.UsbScannerTab
@@ -90,14 +92,16 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
         GsmTabItem("3. Screen & FRP", Icons.Default.Key),
         GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
-        GsmTabItem("6. AT Terminal", Icons.Default.Terminal)
+        GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
+        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics)
     ) else listOf(
         GsmTabItem("1. Tambua Kifaa (OTG)", Icons.Default.Usb),
         GsmTabItem("2. RPBM, KG & Mikopo", Icons.Default.Security),
         GsmTabItem("3. Screen & FRP", Icons.Default.Key),
         GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
-        GsmTabItem("6. AT Terminal", Icons.Default.Terminal)
+        GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
+        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics)
     )
 
     Column(
@@ -319,6 +323,7 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         onAtInputChange = { viewModel.setAtInput(it) },
                         onExecuteAt = { viewModel.executeAtCommand(it) }
                     )
+                    6 -> DiagnosticToolsTab()
                 }
                 Spacer(modifier = Modifier.height(30.dp))
             }

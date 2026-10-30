@@ -41,6 +41,11 @@ Zana ya kitaalamu ya mafundi wa simu (GSM Field Technicians) inayofanya kazi kup
 6. **Direct AT Modem Terminal:**
    - Tuma amri za moja kwa moja za Hayes AT Command kuelekea Baseband Modem (`AT`, `AT+CGMI`, `AT+CGMM`, `AT+CGSN` kusoma IMEI, `AT+SWVER`, `AT+REBOOT`).
 
+7. **Samsung Binary (Bit) Decoder & IMEI Luhn Analyzer:**
+   - **Binary/Bit Decoder:** Huchambua build number ya Samsung (mfano `A055FXXU2BWK2`) na kutambua Binary (BIT 2) ili kumzuia fundi asifanye downgrade isiyo sahihi na kuua simu na kosa la `SW REV CHECK FAIL`.
+   - **GSMA IMEI Luhn Checksum:** Uhakiki halisi wa kimahesabu wa tarakimu 15 za IMEI kuthibitisha usalama wa baseband NVRAM.
+   - **Real Fastboot USB Engine:** Mawasiliano ya moja kwa moja ya bulk transfers kupitia waya wa OTG kuelekea bootloader.
+
 ---
 
 ## 🔒 Ulinzi wa Zana (Technician Master Key)

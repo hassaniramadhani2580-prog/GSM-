@@ -213,30 +213,34 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun executeFastbootCommand(cmd: String) {
+        val dev = selectedDevice.value
         viewModelScope.launch {
             _isBusy.value = true
             addLog(LogLevel.COMMAND, "FASTBOOT-TX", "> $cmd")
-            delay(400)
-            when (cmd) {
-                "fastboot devices" -> {
-                    val dev = selectedDevice.value
-                    if (dev != null && dev.gsmMode == com.example.gsm.model.GsmMode.FASTBOOT) {
-                        addLog(LogLevel.SUCCESS, "FASTBOOT-RX", "${dev.serialNumber ?: "FASTBOOT_DEVICE_01"}    fastboot")
-                    } else {
-                        addLog(LogLevel.SUCCESS, "FASTBOOT-RX", "FA34A100984    fastboot (Device Ready in Bootloader)")
+            delay(200)
+
+            if (dev != null) {
+                val realResult = usbHardwareManager.sendDirectFastbootCommand(dev, cmd)
+                if (realResult.contains("[ERR]") || realResult.contains("[WARN]")) {
+                    addLog(LogLevel.WARNING, "FASTBOOT-RAW", realResult)
+                } else {
+                    addLog(LogLevel.SUCCESS, "FASTBOOT-RX", realResult)
+                }
+            } else {
+                // Offline reference response
+                when (cmd) {
+                    "fastboot devices" -> {
+                        addLog(LogLevel.INFO, "FASTBOOT-INFO", "[!] Hakuna simu iliyopo Fastboot iliyochomekwa. Weka simu kwenye Fastboot (Vol Down + Power) kisha weka kebo ya OTG.")
                     }
-                }
-                "fastboot getvar all" -> {
-                    addLog(LogLevel.INFO, "FASTBOOT-RX", "(bootloader) version-baseband: M9615A-1.0.1\n(bootloader) unlocked: no\n(bootloader) secure: yes\n(bootloader) product: mssumy_pro\nall: finished")
-                }
-                "fastboot oem unlock", "fastboot flashing unlock" -> {
-                    addLog(LogLevel.WARNING, "FASTBOOT-RX", "Amri ya kufungua Bootloader imetumwa!\n(bootloader) Device Unlock Requested. Bonyeza Volume Up kwenye simu kuthibitisha.")
-                }
-                "fastboot erase frp" -> {
-                    addLog(LogLevel.SUCCESS, "FASTBOOT-RX", "erasing 'frp'...\nOKAY [  0.038s ]\nfinished. total time: 0.040s")
-                }
-                else -> {
-                    addLog(LogLevel.SUCCESS, "FASTBOOT-RX", "OKAY [ 0.025s ]\nExecution finished successfully.")
+                    "fastboot getvar all" -> {
+                        addLog(LogLevel.INFO, "FASTBOOT-SYNTAX", "Amri ya getvar:all inasoma vigezo vyote vya partitions. Chomeka kifaa ili kusoma data halisi.")
+                    }
+                    "fastboot erase frp" -> {
+                        addLog(LogLevel.INFO, "FASTBOOT-SYNTAX", "Amri ya erase:frp inafuta partition ya config/frp mara simu inapounganishwa.")
+                    }
+                    else -> {
+                        addLog(LogLevel.INFO, "FASTBOOT-SYNTAX", "Amri ya '$cmd' iko tayari kutumwa kwenye waya wa USB OTG pindi kifaa kinapochomekwa.")
+                    }
                 }
             }
             _isBusy.value = false

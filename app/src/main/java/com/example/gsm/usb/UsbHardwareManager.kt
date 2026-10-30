@@ -212,6 +212,102 @@ class UsbHardwareManager(private val context: Context) {
         }
     }
 
+    /**
+     * Tuma amri halisi ya Fastboot (USB Protocol 0x42/0x03) moja kwa moja kwenye waya wa OTG
+     */
+    fun sendDirectFastbootCommand(device: UsbGsmDevice, command: String): String {
+        val rawDevice = usbManager.deviceList[device.deviceName]
+            ?: return "[ERR] Kifaa cha Fastboot hakijaunganishwa (Offline)."
+
+        if (!usbManager.hasPermission(rawDevice)) {
+            requestDevicePermission(device)
+            return "[WARN] Bonyeza 'Ruhusu' (Grant Permission) ili kuwasiliana na Fastboot Bootloader."
+        }
+
+        var connection: UsbDeviceConnection? = null
+        try {
+            connection = usbManager.openDevice(rawDevice)
+                ?: return "[ERR] Imeshindwa kufungua bandari ya USB ya Fastboot."
+
+            var targetInterface: UsbInterface? = null
+            var inEndpoint: UsbEndpoint? = null
+            var outEndpoint: UsbEndpoint? = null
+
+            for (i in 0 until rawDevice.interfaceCount) {
+                val iface = rawDevice.getInterface(i)
+                for (j in 0 until iface.endpointCount) {
+                    val ep = iface.getEndpoint(j)
+                    if (ep.type == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+                        if (ep.direction == UsbConstants.USB_DIR_IN && inEndpoint == null) {
+                            inEndpoint = ep
+                        } else if (ep.direction == UsbConstants.USB_DIR_OUT && outEndpoint == null) {
+                            outEndpoint = ep
+                        }
+                    }
+                }
+                if (inEndpoint != null && outEndpoint != null) {
+                    targetInterface = iface
+                    break
+                }
+            }
+
+            if (targetInterface != null && outEndpoint != null && inEndpoint != null) {
+                val claimed = connection.claimInterface(targetInterface, true)
+                if (!claimed) return "[WARN] Bandari ya Fastboot inatumiwa na mfumo mwingine."
+
+                // Fastboot syntax translation (mf. "fastboot getvar all" -> "getvar:all")
+                var rawCmd = command.trim()
+                if (rawCmd.startsWith("fastboot ")) {
+                    rawCmd = rawCmd.removePrefix("fastboot ").trim()
+                }
+                val formattedFastbootCmd = when {
+                    rawCmd.startsWith("getvar ") -> "getvar:" + rawCmd.removePrefix("getvar ").trim()
+                    rawCmd.startsWith("erase ") -> "erase:" + rawCmd.removePrefix("erase ").trim()
+                    rawCmd.startsWith("reboot-") -> rawCmd
+                    rawCmd == "devices" -> "getvar:product"
+                    else -> rawCmd
+                }
+
+                val cmdBytes = formattedFastbootCmd.toByteArray(Charsets.US_ASCII)
+                val sent = connection.bulkTransfer(outEndpoint, cmdBytes, cmdBytes.size, 3000)
+
+                val responseBuilder = StringBuilder()
+                val readBuffer = ByteArray(1024)
+                var continueReading = true
+                var attempts = 0
+
+                while (continueReading && attempts < 10) {
+                    attempts++
+                    val bytesRead = connection.bulkTransfer(inEndpoint, readBuffer, readBuffer.size, 1500)
+                    if (bytesRead > 0) {
+                        val chunk = String(readBuffer, 0, bytesRead, Charsets.US_ASCII)
+                        responseBuilder.append(chunk)
+                        if (chunk.startsWith("OKAY") || chunk.startsWith("FAIL")) {
+                            continueReading = false
+                        }
+                    } else {
+                        continueReading = false
+                    }
+                }
+
+                connection.releaseInterface(targetInterface)
+
+                val finalOutput = responseBuilder.toString().trim()
+                return if (finalOutput.isNotBlank()) {
+                    "[FASTBOOT RX] ($sent bytes)\n$finalOutput"
+                } else {
+                    "[INFO] Amri ya '$formattedFastbootCmd' imetumwa ($sent bytes). Kifaa kimetekeleza."
+                }
+            } else {
+                return "[ERR] Kifaa hiki hakina standard Fastboot Bulk Endpoints."
+            }
+        } catch (e: Exception) {
+            return "[ERR] Hitilafu ya mawasiliano ya Fastboot: ${e.message}"
+        } finally {
+            connection?.close()
+        }
+    }
+
     companion object {
         const val ACTION_USB_PERMISSION = "com.mssumy.gsmpro.USB_PERMISSION"
     }
