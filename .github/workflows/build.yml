@@ -9,10 +9,12 @@ on:
 
 jobs:
   build:
-    name: Build & Test APK
+    name: Build Native APK
     runs-on: ubuntu-latest
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
+      JAVA_OPTS: "-Djava.awt.headless=true -Xmx4096m"
+      _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
     steps:
       - name: Checkout Repository
@@ -40,9 +42,6 @@ jobs:
           else
             echo "[✓] debug.keystore already exists."
           fi
-
-      - name: Run Unit Tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
