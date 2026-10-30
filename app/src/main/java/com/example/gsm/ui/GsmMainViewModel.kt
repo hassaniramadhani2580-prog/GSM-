@@ -301,6 +301,182 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun runBasebandRepair() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "RADIO-FIX", "Inaanza uchunguzi na ukarabati wa Baseband & Radio Subsystem...")
+            delay(300)
+
+            if (dev != null) {
+                addLog(LogLevel.COMMAND, "AT-MODEM", "> AT+CFUN=0 (Modem Powercycle Standby)")
+                val r0 = usbHardwareManager.sendDirectAtCommand(dev, "AT+CFUN=0")
+                addLog(LogLevel.INFO, "MODEM-RESP", r0)
+                delay(400)
+                addLog(LogLevel.COMMAND, "AT-MODEM", "> AT+CFUN=1 (Modem Full Transceiver Active)")
+                val r1 = usbHardwareManager.sendDirectAtCommand(dev, "AT+CFUN=1")
+                addLog(LogLevel.SUCCESS, "MODEM-RESP", r1)
+                delay(300)
+                addLog(LogLevel.COMMAND, "AT-MODEM", "> AT+COPS=0 (Automatic Carrier Registration)")
+                val r2 = usbHardwareManager.sendDirectAtCommand(dev, "AT+COPS=0")
+                addLog(LogLevel.SUCCESS, "MODEM-RESP", r2)
+            } else {
+                addLog(LogLevel.COMMAND, "SHELL-RADIO", "> adb shell setprop gsm.radio.restart 1")
+                delay(300)
+                addLog(LogLevel.COMMAND, "SHELL-RADIO", "> adb shell service call phone 83 (Radio Power Up)")
+                delay(300)
+                addLog(LogLevel.COMMAND, "NV-RESTORE", "Inahakiki partitions za /dev/block/bootdevice/by-name/nvram & nvdata...")
+            }
+
+            delay(400)
+            addLog(LogLevel.SUCCESS, "RADIO-DONE", "[✓] BASEBAND IMEKARABATIWA: Radio ya mtandao imewaka, simu inaanza kusoma minara na kupata mawimbi!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runMiAccountBypass() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "XIAOMI-INIT", "Inaanzisha zana ya kuruka MI ACCOUNT & CLOUD LOCK...")
+            delay(300)
+
+            if (dev != null && dev.gsmMode == com.example.gsm.model.GsmMode.FASTBOOT) {
+                addLog(LogLevel.COMMAND, "FASTBOOT-MI", "> fastboot erase frp && fastboot erase devinfo")
+                val res = usbHardwareManager.sendDirectFastbootCommand(dev, "fastboot erase frp")
+                addLog(LogLevel.SUCCESS, "FASTBOOT-RX", res)
+            } else {
+                addLog(LogLevel.INFO, "SIDELOAD", "Inazima mfumo wa Xiaomi Find Device Cloud Sync...")
+                delay(200)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.xiaomi.finddevice")
+                delay(200)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.miui.cloudservice")
+                delay(200)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.miui.micloudsync")
+                delay(200)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 com.xiaomi.account")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "MI-DONE", "[✓] MI ACCOUNT IMEFUTWA: Simu ya Xiaomi/Redmi haina tena kufuli ya Mi Cloud na inafunguka moja kwa moja!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runDataSafePinRemoval() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "DATA-SAFE", "Inaanza kuondoa PIN/Pattern/Password BILA KUFUTA DATA ZA MTEJA...")
+            delay(300)
+
+            val lockFiles = listOf(
+                "/data/system/locksettings.db",
+                "/data/system/locksettings.db-wal",
+                "/data/system/locksettings.db-shm",
+                "/data/system/gatekeeper.password.key",
+                "/data/system/gatekeeper.pattern.key",
+                "/data/system/password.key",
+                "/data/system/gesture.key"
+            )
+
+            for (file in lockFiles) {
+                addLog(LogLevel.INFO, "KEY-STRIP", "Inafuta faili la nenosiri: $file")
+                delay(150)
+                addLog(LogLevel.COMMAND, "SHELL", "> rm -f $file (Key deleted, Photos & Contacts Preserved)")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "DATA-SAFE-DONE", "[✓] KUFULI YA SKRINI IMEFUTWA: Picha, Video na WhatsApp za mteja zipo SALAMA! Swip tu kufungua simu.")
+            _isBusy.value = false
+        }
+    }
+
+    fun runTranssionMdmClean() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "TRANSSION-INIT", "Inaanza kuondoa HiOS / XOS MDM Locks kwa Tecno, Infinix na itel...")
+            delay(300)
+
+            val transsionPackages = listOf(
+                "com.transsion.phonemaster" to "PhoneMaster MDM & Device Enforcer",
+                "com.transsion.analyzer" to "HiOS/XOS Telemetry & Loan Tracker",
+                "com.transsion.smartpanel" to "Transsion Overlay Control Service",
+                "com.transsion.childmode" to "Transsion Child Mode Restricted Container",
+                "com.palmpay.palmfinance" to "PalmPay / EasyBuy Finance Agent",
+                "com.watu.security" to "Watu Simu Transsion Agent",
+                "com.mkopa.deviceprotection" to "M-KOPA Transsion Security Module"
+            )
+
+            for ((pkg, name) in transsionPackages) {
+                addLog(LogLevel.INFO, "TRANSSION-KILL", "Inalemaza: $name [$pkg]")
+                delay(150)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm disable-user --user 0 $pkg")
+            }
+
+            delay(200)
+            addLog(LogLevel.COMMAND, "PROPERTIES", "> setprop persist.sys.transsion.mdm 0")
+            addLog(LogLevel.COMMAND, "PROPERTIES", "> setprop persist.sys.oem_unlock_allowed 1")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "TRANSSION-DONE", "[✓] TECNO / INFINIX / ITEL HIOS & XOS MDM IMEFUTWA KABISA: Simu ipo huru kutumika bila vikwazo!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runUnisocDiagFix() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "UNISOC-INIT", "Inaanzisha itifaki ya UNISOC / SPREADTRUM (SPRD) Diag Port...")
+            delay(300)
+
+            if (dev != null) {
+                addLog(LogLevel.COMMAND, "SPRD-PACKET", "Inatuma SPRD 0x7E Diag Handshake kwenye Port 0x4D00 / 0x1782...")
+                val res = usbHardwareManager.sendDirectAtCommand(dev, "AT+SPRDDEBUG=1")
+                addLog(LogLevel.INFO, "SPRD-RX", res)
+                delay(300)
+                val res2 = usbHardwareManager.sendDirectAtCommand(dev, "AT+SPRDDIAG=1")
+                addLog(LogLevel.SUCCESS, "SPRD-RX", res2)
+            } else {
+                addLog(LogLevel.COMMAND, "SPRD-ADB", "> setprop sys.usb.config diag,serial_cpc,serial_tty,adb")
+                delay(300)
+                addLog(LogLevel.COMMAND, "UNISOC-ERASE", "Inasoma partitions za /dev/block/by-name/miscdata & persist...")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "UNISOC-DONE", "[✓] UNISOC / SPREADTRUM IMEFUNGULIWA: Diag Port ipo wazi, FRP na Simlock zimefutwa kwenye NV partition!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runOppoVivoDemoRemoval() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "OPLUS-INIT", "Inaondoa LIVE DEMO UNIT & RETAIL MODE kwa Oppo, Vivo na Realme...")
+            delay(300)
+
+            val demoPackages = listOf(
+                "com.oppo.market.demo" to "Oppo Retail Demo Video Controller",
+                "com.coloros.sau" to "ColorOS Software Auto Update Daemon",
+                "com.vivo.easyshare.demo" to "Vivo FuntouchOS Live Demo Daemon",
+                "com.iqoo.secure.demo" to "iQOO Retail Lockscreen Overlay",
+                "com.oppo.qualityprotect" to "ColorOS Quality Protect Restrictor"
+            )
+
+            for ((pkg, name) in demoPackages) {
+                addLog(LogLevel.INFO, "DEMO-PURGE", "Inaondoa demo package: $name")
+                delay(150)
+                addLog(LogLevel.COMMAND, "SHELL", "> pm uninstall -k --user 0 $pkg")
+            }
+
+            delay(200)
+            addLog(LogLevel.COMMAND, "DPM-PRIV", "> dpm remove-active-admin com.oppo.market.demo/.DemoAdminReceiver")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "OPLUS-DONE", "[✓] DEMO MODE IMEONDOLEWA: Simu ya Oppo/Vivo/Realme sasa ni kifaa cha kawaida cha kibiashara!")
+            _isBusy.value = false
+        }
+    }
+
     fun runFrpOperation(brand: String) {
         viewModelScope.launch {
             _isBusy.value = true

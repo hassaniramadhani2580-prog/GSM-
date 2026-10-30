@@ -52,7 +52,10 @@ fun FrpUnlockTab(
     isBusy: Boolean,
     selectedMtkChip: String,
     onSelectMtkChip: (String) -> Unit,
-    onRunFrp: (String) -> Unit
+    onRunFrp: (String) -> Unit,
+    onRunDataSafeLock: () -> Unit = {},
+    onRunMiAccount: () -> Unit = {},
+    onRunBasebandFix: () -> Unit = {}
 ) {
     val currentOffsets = GsmProtocolEngine.getMtkOffsets(selectedMtkChip)
     val samsungExploitSteps = GsmProtocolEngine.buildSamsungMtpExploit("Universal")
@@ -190,6 +193,69 @@ fun FrpUnlockTab(
                 Icon(imageVector = Icons.Default.Code, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Fastboot Erase", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        // Sehemu Mpya ya Kibingwa: Data-Safe Lock Remover & Xiaomi / Baseband Doctor
+        Text(
+            text = "ZANA ZAIDI ZA KIOFISI (DATA-SAFE & BASEBAND REPAIR):",
+            color = CyberCyan,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+        )
+
+        Button(
+            onClick = onRunDataSafeLock,
+            enabled = !isBusy,
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF059669),
+                contentColor = Color.White
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .testTag("btn_data_safe_lock")
+        ) {
+            Text("Ondoa PIN / Pattern BILA KUFUTA PICHA NA DATA (Data-Safe)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = onRunMiAccount,
+                enabled = !isBusy,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF6900),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp)
+                    .testTag("btn_mi_account_bypass")
+            ) {
+                Text("Xiaomi Mi Cloud", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Button(
+                onClick = onRunBasebandFix,
+                enabled = !isBusy,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0284C7),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp)
+                    .testTag("btn_baseband_repair")
+            ) {
+                Text("Baseband / No Service", fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
 

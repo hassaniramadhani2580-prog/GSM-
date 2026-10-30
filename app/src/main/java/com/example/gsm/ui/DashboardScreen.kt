@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DeveloperBoard
+import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.QrCode2
@@ -60,6 +61,7 @@ import com.example.gsm.ui.tabs.BromEdlTab
 import com.example.gsm.ui.tabs.DiagnosticToolsTab
 import com.example.gsm.ui.tabs.FrpUnlockTab
 import com.example.gsm.ui.tabs.KnoxKgTab
+import com.example.gsm.ui.tabs.MultiBrandTab
 import com.example.gsm.ui.tabs.QrProvisioningTab
 import com.example.gsm.ui.tabs.UsbScannerTab
 import com.example.ui.theme.CyberCyan
@@ -96,7 +98,8 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
         GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
         GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics),
-        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2)
+        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2),
+        GsmTabItem("9. Multi-Brand Suite", Icons.Default.DevicesOther)
     ) else listOf(
         GsmTabItem("1. Tambua Kifaa (OTG)", Icons.Default.Usb),
         GsmTabItem("2. RPBM, KG & Mikopo", Icons.Default.Security),
@@ -105,7 +108,8 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
         GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
         GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics),
-        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2)
+        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2),
+        GsmTabItem("9. Tecno / Infinix / Unisoc", Icons.Default.DevicesOther)
     )
 
     Column(
@@ -315,7 +319,10 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         isBusy = isBusy,
                         selectedMtkChip = selectedMtkChip,
                         onSelectMtkChip = { viewModel.setMtkChip(it) },
-                        onRunFrp = { viewModel.runFrpOperation(it) }
+                        onRunFrp = { viewModel.runFrpOperation(it) },
+                        onRunDataSafeLock = { viewModel.runDataSafePinRemoval() },
+                        onRunMiAccount = { viewModel.runMiAccountBypass() },
+                        onRunBasebandFix = { viewModel.runBasebandRepair() }
                     )
                     3 -> BootloaderTab(
                         isBusy = isBusy,
@@ -334,6 +341,12 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                     )
                     6 -> DiagnosticToolsTab()
                     7 -> QrProvisioningTab()
+                    8 -> MultiBrandTab(
+                        isBusy = isBusy,
+                        onRunTranssionMdm = { viewModel.runTranssionMdmClean() },
+                        onRunUnisocDiag = { viewModel.runUnisocDiagFix() },
+                        onRunOppoVivoDemo = { viewModel.runOppoVivoDemoRemoval() }
+                    )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
             }
