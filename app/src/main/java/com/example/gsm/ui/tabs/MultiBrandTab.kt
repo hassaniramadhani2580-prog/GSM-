@@ -16,10 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.SettingsCell
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -52,7 +54,11 @@ fun MultiBrandTab(
     isBusy: Boolean,
     onRunTranssionMdm: () -> Unit,
     onRunUnisocDiag: () -> Unit,
-    onRunOppoVivoDemo: () -> Unit
+    onRunOppoVivoDemo: () -> Unit,
+    onRunTranssionTee: () -> Unit = {},
+    onRunXiaomiFirewall: () -> Unit = {},
+    onRunOplusPreloaderCrash: () -> Unit = {},
+    onRunUnisocNvBackup: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -83,7 +89,7 @@ fun MultiBrandTab(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "MULTI-BRAND MASTER SUITE (NON-SAMSUNG)",
+                        text = "MULTI-BRAND MASTER SUITE (GLOBAL EDITION)",
                         color = MatrixGreen,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.5.sp,
@@ -91,7 +97,7 @@ fun MultiBrandTab(
                     )
                 }
                 Text(
-                    text = "Zana maalum kwa ajili ya simu za Tecno, Infinix, itel (Transsion Group), Unisoc/Spreadtrum, Xiaomi, Oppo, Vivo na Realme.",
+                    text = "Zana maalum kwa ajili ya simu za Tecno, Infinix, itel (Transsion Group), Unisoc/Spreadtrum, Xiaomi/Redmi, Oppo, Vivo na Realme.",
                     color = TextSecondary,
                     fontSize = 12.sp
                 )
@@ -150,6 +156,22 @@ fun MultiBrandTab(
                 ) {
                     Text("Ondoa HiOS / XOS MDM & EasyBuy Mara Moja", fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
                 }
+
+                Button(
+                    onClick = onRunTranssionTee,
+                    enabled = !isBusy,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFB45309),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .testTag("btn_transsion_tee")
+                ) {
+                    Text("Kinga TEE TrustZone & Zuia Red State Warning", fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
+                }
             }
         }
 
@@ -190,25 +212,101 @@ fun MultiBrandTab(
                     fontSize = 11.5.sp
                 )
 
-                Button(
-                    onClick = onRunUnisocDiag,
-                    enabled = !isBusy,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CyberCyan,
-                        contentColor = Color(0xFF001F24)
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp)
-                        .testTag("btn_unisoc_diag")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Fungua Unisoc Diag Port & Reset FRP / NV", fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
+                    Button(
+                        onClick = onRunUnisocDiag,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CyberCyan,
+                            contentColor = Color(0xFF001F24)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_unisoc_diag")
+                    ) {
+                        Text("SPRD Diag FRP", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+
+                    Button(
+                        onClick = onRunUnisocNvBackup,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MatrixGreen,
+                            contentColor = Color(0xFF00220F)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_unisoc_backup")
+                    ) {
+                        Text("Backup NVRAM", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
                 }
             }
         }
 
-        // Section 3: Oppo / Vivo / Realme Demo Remover
+        // Section 3: Xiaomi Mi Cloud Firewall
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, GsmCardBorder, RoundedCornerShape(12.dp)),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = GsmSurfaceElevated)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = Color(0xFFEC4899),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "XIAOMI / REDMI / POCO (MI CLOUD FIREWALL):",
+                        color = Color(0xFFEC4899),
+                        fontSize = 11.5.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Text(
+                    text = "Ukuta wa kuzuia simu ya Xiaomi isijifunge tena (Anti-Relock) mteja akiweka Wi-Fi au internet.",
+                    color = TextSecondary,
+                    fontSize = 11.5.sp
+                )
+
+                Button(
+                    onClick = onRunXiaomiFirewall,
+                    enabled = !isBusy,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFEC4899),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                        .testTag("btn_xiaomi_firewall")
+                ) {
+                    Text("Washa Mi Cloud Anti-Relock Firewall", fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
+                }
+            }
+        }
+
+        // Section 4: Oppo / Vivo / Realme
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -231,7 +329,7 @@ fun MultiBrandTab(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "OPPO • VIVO • REALME (DEMO UNIT REMOVER):",
+                        text = "OPPO • VIVO • REALME (DEMO & PRELOADER CRASH):",
                         color = Color(0xFFFF6900),
                         fontSize = 11.5.sp,
                         fontFamily = FontFamily.Monospace,
@@ -240,25 +338,46 @@ fun MultiBrandTab(
                 }
 
                 Text(
-                    text = "Huondoa Retail Live Demo Mode, video za dukani, na kurejesha mfumo kuwa simu ya kawaida.",
+                    text = "Ondoa Live Demo Mode au lazimisha simu kuingia MediaTek BROM Mode bila kufungua bodi.",
                     color = TextSecondary,
                     fontSize = 11.5.sp
                 )
 
-                Button(
-                    onClick = onRunOppoVivoDemo,
-                    enabled = !isBusy,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF6900),
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp)
-                        .testTag("btn_oppo_vivo_demo")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Ondoa Live Demo Mode & Funga Retail Admin", fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
+                    Button(
+                        onClick = onRunOppoVivoDemo,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF6900),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_oppo_vivo_demo")
+                    ) {
+                        Text("Ondoa Demo Mode", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+
+                    Button(
+                        onClick = onRunOplusPreloaderCrash,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF7C3AED),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_oplus_preloader_crash")
+                    ) {
+                        Text("Preloader Crash BROM", fontWeight = FontWeight.Bold, fontSize = 11.5.sp)
+                    }
                 }
             }
         }

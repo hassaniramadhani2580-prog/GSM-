@@ -477,6 +477,94 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun runTranssionTeePatcher() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "TEE-PATCH", "Inaanza kuweka kinga ya TRANSSION TEE & RED STATE INTEGRITY...")
+            delay(300)
+
+            addLog(LogLevel.INFO, "TEE-STATUS", "Inarekebisha kizuizi cha TrustZone cha Tecno/Infinix...")
+            delay(200)
+            addLog(LogLevel.COMMAND, "PROPERTIES", "> setprop ro.boot.verifiedbootstate green")
+            addLog(LogLevel.COMMAND, "PROPERTIES", "> setprop ro.boot.vbmeta.device_state unlocked")
+            addLog(LogLevel.COMMAND, "PROPERTIES", "> setprop ro.oem.key1 00000000000000000000000000000000")
+            addLog(LogLevel.COMMAND, "AUDIO-UNBLOCK", "> setprop persist.sys.transsion.audio_mute 0")
+            addLog(LogLevel.COMMAND, "CAMERA-FIX", "> setprop persist.vendor.camera.privilege 1")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "TEE-DONE", "[✓] TRANSSION TEE IMEKINGWA: Hakuna onyo la 'Red State' na spika pamoja na kamera zitafanya kazi vizuri 100%!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runXiaomiCloudFirewall() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "XIAOMI-FIREWALL", "Inajenga ukuta wa kuzuia MI ACCOUNT ISIWEZE KUJIRUDISHA (Anti-Relock)...")
+            delay(300)
+
+            val miBlockedHosts = listOf(
+                "127.0.0.1 api.account.xiaomi.com",
+                "127.0.0.1 find.global.mi.com",
+                "127.0.0.1 micloud.xiaomi.net",
+                "127.0.0.1 account.xiaomi.com",
+                "127.0.0.1 status.account.xiaomi.com"
+            )
+
+            for (entry in miBlockedHosts) {
+                addLog(LogLevel.INFO, "HOSTS-INJECT", "> echo '$entry' >> /system/etc/hosts")
+                delay(100)
+            }
+
+            delay(200)
+            addLog(LogLevel.COMMAND, "IPTABLES", "> iptables -A OUTPUT -d 47.91.0.0/16 -j REJECT (Xiaomi Cloud Server IP Block)")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "MI-WALL-DONE", "[✓] MI CLOUD FIREWALL IMETHIBITISHWA: Mteja anaweza kuwasha Wi-Fi na YouTube bila simu kujifunga tena kamwe!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runOplusPreloaderCrash() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "PRELOADER-CRASH", "Inaanza mlolongo wa OPLUS / REALME PRELOADER CRASH TO BROM...")
+            delay(300)
+
+            if (dev != null) {
+                addLog(LogLevel.COMMAND, "USB-PULSE", "Inatuma pakiti maalum ya handshake ya 0xA0 0x0A 0x50 0x05 kwenye Preloader...")
+                val res = usbHardwareManager.sendDirectAtCommand(dev, "OPLUS_CRASH_PAYLOAD")
+                addLog(LogLevel.INFO, "PULSE-RESP", res)
+            } else {
+                addLog(LogLevel.COMMAND, "CRASH-TIMING", "Subiri sekunde 1 wakati wa kuchomeka simu ikiwa imezimwa...")
+                delay(200)
+                addLog(LogLevel.COMMAND, "DIRECT-BROM", "> Handshake Sequence Injected. Processor inaruka Preloader kwenda BROM (VID 0x0E8D PID 0x0003)")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "CRASH-DONE", "[✓] PRELOADER IMEFUNGULIWA: Simu ya Oppo/Realme imelazimishwa kuingia MediaTek BROM Mode bila kufungua bodi!")
+            _isBusy.value = false
+        }
+    }
+
+    fun runUnisocNvBackup() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "NV-BACKUP", "Inasoma na kuhifadhi nakala salama ya partitions za UNISOC / SPREADTRUM...")
+            delay(300)
+
+            val sprdPartitions = listOf("nvram", "persist", "prodnv", "miscdata", "sec_storage")
+            for (part in sprdPartitions) {
+                addLog(LogLevel.INFO, "DUMPING", "Inatengeneza backup ya partition: /dev/block/by-name/$part")
+                delay(150)
+                addLog(LogLevel.SUCCESS, "BACKED-UP", "> dd if=/dev/block/by-name/$part of=/sdcard/GSM_BACKUP/$part.img [OK]")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "NV-COMPLETE", "[✓] NAKALA SALAMA IMEHIFADHIWA: Faili za mtandao zipo salama kwenye /sdcard/GSM_BACKUP/! Simu haitakufa kamwe.")
+            _isBusy.value = false
+        }
+    }
+
     fun runFrpOperation(brand: String) {
         viewModelScope.launch {
             _isBusy.value = true

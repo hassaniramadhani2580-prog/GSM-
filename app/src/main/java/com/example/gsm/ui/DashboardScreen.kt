@@ -345,7 +345,11 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         isBusy = isBusy,
                         onRunTranssionMdm = { viewModel.runTranssionMdmClean() },
                         onRunUnisocDiag = { viewModel.runUnisocDiagFix() },
-                        onRunOppoVivoDemo = { viewModel.runOppoVivoDemoRemoval() }
+                        onRunOppoVivoDemo = { viewModel.runOppoVivoDemoRemoval() },
+                        onRunTranssionTee = { viewModel.runTranssionTeePatcher() },
+                        onRunXiaomiFirewall = { viewModel.runXiaomiCloudFirewall() },
+                        onRunOplusPreloaderCrash = { viewModel.runOplusPreloaderCrash() },
+                        onRunUnisocNvBackup = { viewModel.runUnisocNvBackup() }
                     )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
