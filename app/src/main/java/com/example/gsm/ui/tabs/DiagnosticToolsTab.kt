@@ -203,13 +203,29 @@ fun DiagnosticToolsTab() {
                                 fontSize = 11.5.sp,
                                 fontFamily = FontFamily.Monospace
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = info.safetyAdvice,
+                                text = info.bitVulnerabilities,
+                                color = TechAmber,
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                lineHeight = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = info.bypassStrategy,
                                 color = MatrixGreen,
                                 fontSize = 11.sp,
                                 fontFamily = FontFamily.Monospace,
                                 lineHeight = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = info.safetyAdvice,
+                                color = DangerNeon,
+                                fontSize = 10.5.sp,
+                                fontFamily = FontFamily.Monospace,
+                                lineHeight = 14.sp
                             )
                         }
                     }
