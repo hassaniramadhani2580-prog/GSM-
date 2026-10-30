@@ -7,6 +7,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Native APK
@@ -52,3 +55,20 @@ jobs:
           name: MSSUMY-GSM-PRO-v6.0-Native-Debug
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      - name: Create or Update GitHub Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v6.0-latest
+          name: "MSSUMY GSM PRO v6.0 (Direct APK)"
+          body: |
+            ### MSSUMY GSM PRO v6.0 - Direct APK Download
+            - **Native Android GSM Technician Suite**
+            - Includes USB OTG Scanner, Samsung Binary Bit Decoder, FRP & Loan Lock Tools.
+            - Direct download below:
+          draft: false
+          prerelease: false
+          files: app/build/outputs/apk/debug/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
