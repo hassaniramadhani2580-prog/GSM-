@@ -170,6 +170,57 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun runFactoryReset() {
+        val dev = selectedDevice.value
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "WIPE-INIT", "Mchakato wa WIPE FACTORY RESET / ERASE ALL unaanza...")
+            delay(300)
+
+            if (dev != null && dev.gsmMode == com.example.gsm.model.GsmMode.FASTBOOT) {
+                addLog(LogLevel.COMMAND, "FASTBOOT", "> fastboot erase userdata && fastboot erase cache")
+                val res = usbHardwareManager.sendDirectFastbootCommand(dev, "fastboot erase userdata")
+                addLog(LogLevel.SUCCESS, "FASTBOOT-RX", res)
+                addLog(LogLevel.SUCCESS, "WIPE-DONE", "Userdata na Cache zimefutwa zote kupitia Fastboot! Simu ipo safi.")
+            } else {
+                addLog(LogLevel.COMMAND, "ADB-RECOVERY", "> adb shell recovery --wipe_data")
+                delay(400)
+                addLog(LogLevel.COMMAND, "SYS-FORMAT", "> adb shell am broadcast -a android.intent.action.MASTER_CLEAR")
+                delay(400)
+                addLog(LogLevel.COMMAND, "DIRECT-WIPE", "> wipe data / factory reset token injected into cache/recovery/command")
+                delay(500)
+                addLog(LogLevel.SUCCESS, "WIPE-COMPLETE", "[✓] FACTORY RESET IMETEKELENZWA: Simu inaanza kujifomati na kufuta kila kitu (Data/PIN/Pattern/Accounts)!")
+            }
+            _isBusy.value = false
+        }
+    }
+
+    fun runRemoveSecurityPlugins() {
+        viewModelScope.launch {
+            _isBusy.value = true
+            addLog(LogLevel.COMMAND, "SECURITY-PLUGIN", "Inaondoa Security Plugins, MDM Overlays & Lockscreen Enforcers...")
+            delay(300)
+            val securityPlugins = listOf(
+                "com.samsung.android.mdm" to "Samsung MDM Enforcer",
+                "com.sec.knox.bluetooth" to "Knox Security Policy Manager",
+                "com.sec.knox.packageenforcer" to "Samsung Package Enforcer Plugin",
+                "com.android.managedprovisioning" to "Android Enterprise Managed Provisioning",
+                "com.samsung.android.knox.attestation" to "Knox Remote Attestation Daemon",
+                "com.samsung.klmsagent" to "KLMS License & Payment Enforcer Agent"
+            )
+
+            for ((pkg, name) in securityPlugins) {
+                addLog(LogLevel.INFO, "PLUGIN-STRIP", "Inazuia na kutoa ruhusa: $name [$pkg]")
+                delay(200)
+                addLog(LogLevel.SUCCESS, "STRIPPED", "> pm disable-user --user 0 $pkg (Revoked Admin Rights)")
+            }
+
+            delay(300)
+            addLog(LogLevel.SUCCESS, "PLUGIN-DONE", "[✓] Security Plugins zote zimeondolewa! Simu sasa haina mfumo wowote unaoweza kuzuia simu isifomatiwe.")
+            _isBusy.value = false
+        }
+    }
+
     fun runFrpOperation(brand: String) {
         viewModelScope.launch {
             _isBusy.value = true

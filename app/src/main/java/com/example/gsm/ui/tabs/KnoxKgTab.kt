@@ -47,7 +47,9 @@ import com.example.ui.theme.TextSecondary
 @Composable
 fun KnoxKgTab(
     isBusy: Boolean,
-    onRunKnoxClean: () -> Unit
+    onRunKnoxClean: () -> Unit,
+    onRunFactoryReset: () -> Unit = {},
+    onRunRemoveSecurityPlugins: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val fullScript = GsmProtocolEngine.buildKnoxCleanScript(GsmKnowledgeBase.knoxPackages)
@@ -134,8 +136,53 @@ fun KnoxKgTab(
                     Text(
                         text = if (isBusy) "Inatekeleza Usafishaji..." else "Ondoa Knox & Loan Lock Mara Moja",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontSize = 13.5.sp
                     )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onRunFactoryReset,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFC2410C),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_wipe_factory_reset")
+                    ) {
+                        Text(
+                            text = "Wipe Factory Reset",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Button(
+                        onClick = onRunRemoveSecurityPlugins,
+                        enabled = !isBusy,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = TechAmber,
+                            contentColor = Color(0xFF241A00)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp)
+                            .testTag("btn_remove_security_plugins")
+                    ) {
+                        Text(
+                            text = "Remove Plugins",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }

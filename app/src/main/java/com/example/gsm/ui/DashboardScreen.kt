@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Terminal
@@ -59,6 +60,7 @@ import com.example.gsm.ui.tabs.BromEdlTab
 import com.example.gsm.ui.tabs.DiagnosticToolsTab
 import com.example.gsm.ui.tabs.FrpUnlockTab
 import com.example.gsm.ui.tabs.KnoxKgTab
+import com.example.gsm.ui.tabs.QrProvisioningTab
 import com.example.gsm.ui.tabs.UsbScannerTab
 import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.DangerNeon
@@ -93,7 +95,8 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
         GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
         GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
-        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics)
+        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics),
+        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2)
     ) else listOf(
         GsmTabItem("1. Tambua Kifaa (OTG)", Icons.Default.Usb),
         GsmTabItem("2. RPBM, KG & Mikopo", Icons.Default.Security),
@@ -101,7 +104,8 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
         GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
         GsmTabItem("6. AT Terminal", Icons.Default.Terminal),
-        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics)
+        GsmTabItem("7. Bit & IMEI Diag", Icons.Default.Analytics),
+        GsmTabItem("8. QR ADB / DPC", Icons.Default.QrCode2)
     )
 
     Column(
@@ -300,7 +304,9 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                     )
                     1 -> KnoxKgTab(
                         isBusy = isBusy,
-                        onRunKnoxClean = { viewModel.runKnoxClean() }
+                        onRunKnoxClean = { viewModel.runKnoxClean() },
+                        onRunFactoryReset = { viewModel.runFactoryReset() },
+                        onRunRemoveSecurityPlugins = { viewModel.runRemoveSecurityPlugins() }
                     )
                     2 -> FrpUnlockTab(
                         isBusy = isBusy,
@@ -324,6 +330,7 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         onExecuteAt = { viewModel.executeAtCommand(it) }
                     )
                     6 -> DiagnosticToolsTab()
+                    7 -> QrProvisioningTab()
                 }
                 Spacer(modifier = Modifier.height(30.dp))
             }
