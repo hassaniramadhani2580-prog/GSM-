@@ -149,6 +149,13 @@ class UsbHardwareManager(private val context: Context) {
         val rawDevice = usbManager.deviceList[device.deviceName]
             ?: return "[ERR] Kifaa hakikupatikana kwenye bandari ya USB (Device offline)."
 
+        if (device.gsmMode == com.example.gsm.model.GsmMode.SAMSUNG_DOWNLOAD) {
+            return "[WARN] SIMU IPO KWENYE ODIN / DOWNLOAD MODE!\n" +
+                    "• Odin Mode inasikiliza LOKE flashing protocol pekee.\n" +
+                    "• Haipokei amri za AT za Modem (kama AT+KICQ).\n" +
+                    "• SULUHISHO: Washa simu kawaida hadi skrini ya mwanzo, piga *#0*# au *#*#88#*#* kwenye Emergency Call kuamsha Modem Port, kisha utume AT+KICQ."
+        }
+
         if (!usbManager.hasPermission(rawDevice)) {
             requestDevicePermission(device)
             return "[WARN] Ruhusa ya USB inahitajika (USB Permission Requested). Tafadhali bonyeza 'Ruhusu' kwenye dirisha linalojitokeza."
@@ -159,37 +166,52 @@ class UsbHardwareManager(private val context: Context) {
             connection = usbManager.openDevice(rawDevice)
                 ?: return "[ERR] Haijaweza kufungua muunganisho wa USB Connection. Hakikisha kebo ya OTG iko imara."
 
-            // Tafuta serial au communication interface
             var targetInterface: UsbInterface? = null
             var inEndpoint: UsbEndpoint? = null
             var outEndpoint: UsbEndpoint? = null
 
+            // Iterate across all interfaces to locate active bulk endpoints
             for (i in 0 until rawDevice.interfaceCount) {
                 val iface = rawDevice.getInterface(i)
+                var tempIn: UsbEndpoint? = null
+                var tempOut: UsbEndpoint? = null
+
                 for (j in 0 until iface.endpointCount) {
                     val ep = iface.getEndpoint(j)
                     if (ep.type == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-                        if (ep.direction == UsbConstants.USB_DIR_IN && inEndpoint == null) {
-                            inEndpoint = ep
-                        } else if (ep.direction == UsbConstants.USB_DIR_OUT && outEndpoint == null) {
-                            outEndpoint = ep
+                        if (ep.direction == UsbConstants.USB_DIR_IN && tempIn == null) {
+                            tempIn = ep
+                        } else if (ep.direction == UsbConstants.USB_DIR_OUT && tempOut == null) {
+                            tempOut = ep
                         }
                     }
                 }
-                if (inEndpoint != null && outEndpoint != null) {
+                if (tempIn != null && tempOut != null) {
                     targetInterface = iface
-                    break
+                    inEndpoint = tempIn
+                    outEndpoint = tempOut
+                    // Prefer CDC Data Class (10) or Communication Class (2) or Vendor Specific (255)
+                    if (iface.interfaceClass == 10 || iface.interfaceClass == 2 || iface.interfaceClass == 255) {
+                        break
+                    }
                 }
             }
 
             if (targetInterface != null && outEndpoint != null && inEndpoint != null) {
                 val claimed = connection.claimInterface(targetInterface, true)
                 if (!claimed) {
-                    return "[WARN] Interface ya USB imefungwa na mfumo mwingine (Resource Busy)."
+                    return "[WARN] Bandari ya USB imefungwa na mfumo mwingine (Resource Busy)."
                 }
 
                 val cmdBytes = (command + "\r\n").toByteArray(Charsets.US_ASCII)
                 val bytesSent = connection.bulkTransfer(outEndpoint, cmdBytes, cmdBytes.size, 2000)
+
+                if (bytesSent <= 0) {
+                    connection.releaseInterface(targetInterface)
+                    return "[WARN] Bandari ya Modem AT imekataa kufunguka (Error: $bytesSent bytes).\n" +
+                            "• Sababu: Simu ipo kwenye Loan Lock na Modem Port imefungwa na mfumo.\n" +
+                            "• SULUHISHO: Zima simu, weka bila simcard, washa tena, piga *#0*# au *#*#88#*#* kwenye Emergency Call kwanza kuifungua modem port."
+                }
 
                 val readBuffer = ByteArray(1024)
                 val bytesRead = connection.bulkTransfer(inEndpoint, readBuffer, readBuffer.size, 2500)
@@ -198,12 +220,12 @@ class UsbHardwareManager(private val context: Context) {
 
                 return if (bytesRead > 0) {
                     val reply = String(readBuffer, 0, bytesRead, Charsets.US_ASCII).trim()
-                    "[SUCCESS] Amri imetumwa (${bytesSent}b). Majibu:\n$reply"
+                    "[SUCCESS] Amri ya '$command' imetumwa ($bytesSent bytes). Majibu ya Modem:\n$reply"
                 } else {
-                    "[INFO] Amri ya '$command' imetumwa kwa mafanikio (${bytesSent} bytes) kwenye USB bulk stream. Kifaa kiko katika kusubiri."
+                    "[SUCCESS] Amri ya '$command' imetumwa ($bytesSent bytes) kwenye Modem serial pipe. Kifaa kinasubiri."
                 }
             } else {
-                return "[INFO] Kifaa hiki cha ${device.gsmMode.displayName} kinatumia standard Vendor Control Requests. Amri imeandaliwa kwa ajili ya interface hii."
+                return "[INFO] Kifaa hiki hakijatoa Active Serial Bulk Endpoints za Modem."
             }
         } catch (e: Exception) {
             return "[ERR] Hitilafu ya mawasiliano ya USB: ${e.message}"

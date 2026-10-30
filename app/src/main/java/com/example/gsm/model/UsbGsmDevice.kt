@@ -2,6 +2,7 @@ package com.example.gsm.model
 
 enum class GsmMode(val displayName: String, val chipFamily: String, val colorHex: Long) {
     SAMSUNG_DOWNLOAD("Samsung Download / Odin Mode", "Samsung Exynos/QC", 0xFF00E5FF),
+    SAMSUNG_MTP("Samsung Normal MTP / Modem Mode", "Samsung Exynos/MTK", 0xFF00E676),
     MTK_BROM("MediaTek BROM Mode (BootROM)", "MediaTek", 0xFFFF9100),
     MTK_PRELOADER("MediaTek Preloader VCOM", "MediaTek", 0xFFFFB300),
     QUALCOMM_EDL_9008("Qualcomm EDL 9008 (Emergency)", "Qualcomm Snapdragon", 0xFFFF1744),
@@ -34,8 +35,11 @@ data class UsbGsmDevice(
             val pName = (productName ?: "").lowercase()
 
             return when {
-                // Samsung
-                vid == 0x04E8 && (pid == 0x685D || pid == 0x6860 || pid == 0x685E) -> GsmMode.SAMSUNG_DOWNLOAD
+                // Samsung Download / Odin Mode (0x685D)
+                vid == 0x04E8 && pid == 0x685D -> GsmMode.SAMSUNG_DOWNLOAD
+                // Samsung Normal Booted MTP / Modem Mode (0x6860, 0x685E, 0x685C)
+                vid == 0x04E8 && (pid == 0x6860 || pid == 0x685E || pid == 0x685C) -> GsmMode.SAMSUNG_MTP
+                // Samsung ADB Composite
                 vid == 0x04E8 && (pid == 0x686A || pid == 0x6865 || pid == 0x6866) -> GsmMode.ADB_COMPOSITE
                 // MediaTek
                 vid == 0x0E8D && (pid == 0x0003 || pid == 0x0001 || pid == 0x2000) -> GsmMode.MTK_BROM
@@ -50,7 +54,7 @@ data class UsbGsmDevice(
                 vid == 0x18D1 && (pid == 0x4EE7 || pid == 0x4EE2 || pName.contains("adb")) -> GsmMode.ADB_COMPOSITE
                 // Generic detection by name keywords
                 pName.contains("fastboot") -> GsmMode.FASTBOOT
-                pName.contains("download") -> GsmMode.SAMSUNG_DOWNLOAD
+                pName.contains("odin") || pName.contains("download") -> GsmMode.SAMSUNG_DOWNLOAD
                 pName.contains("edl") || pName.contains("9008") -> GsmMode.QUALCOMM_EDL_9008
                 pName.contains("brom") || pName.contains("mtk") -> GsmMode.MTK_BROM
                 else -> GsmMode.GENERIC_USB
