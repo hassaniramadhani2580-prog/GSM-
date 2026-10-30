@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 val isAuthenticated by viewModel.isAuthenticated.collectAsState()
                 val loginError by viewModel.loginError.collectAsState()
+                val currentLanguage by viewModel.currentLanguage.collectAsState()
 
                 Box(
                     modifier = Modifier
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     if (!isAuthenticated) {
                         LoginScreen(
+                            currentLanguage = currentLanguage,
+                            onToggleLanguage = { viewModel.toggleLanguage() },
                             onLoginSuccess = { password ->
                                 viewModel.verifyPassword(password)
                             },

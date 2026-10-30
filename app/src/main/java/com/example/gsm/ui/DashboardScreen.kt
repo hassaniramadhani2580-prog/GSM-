@@ -3,6 +3,7 @@ package com.example.gsm.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,10 +82,18 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
     val selectedTestPoint by viewModel.selectedTestPoint.collectAsState()
     val isBusy by viewModel.isBusy.collectAsState()
     val atInput by viewModel.atInput.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
 
-    val tabList = listOf(
+    val tabList = if (currentLanguage == com.example.gsm.model.AppLanguage.ENGLISH) listOf(
         GsmTabItem("1. OTG Auto-Detect", Icons.Default.Usb),
         GsmTabItem("2. RPBM, KG & Loans", Icons.Default.Security),
+        GsmTabItem("3. Screen & FRP", Icons.Default.Key),
+        GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
+        GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
+        GsmTabItem("6. AT Terminal", Icons.Default.Terminal)
+    ) else listOf(
+        GsmTabItem("1. Tambua Kifaa (OTG)", Icons.Default.Usb),
+        GsmTabItem("2. RPBM, KG & Mikopo", Icons.Default.Security),
         GsmTabItem("3. Screen & FRP", Icons.Default.Key),
         GsmTabItem("4. Bootloader", Icons.Default.SystemUpdate),
         GsmTabItem("5. BROM & EDL", Icons.Default.DeveloperBoard),
@@ -173,6 +182,27 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                         Text(
                             text = if (connectedDevices.isNotEmpty()) "OTG: ONLINE" else "OTG: READY",
                             color = if (connectedDevices.isNotEmpty()) MatrixGreen else TechAmber,
+                            fontSize = 10.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Language toggle badge
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(CyberCyan.copy(alpha = 0.15f))
+                            .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                            .clickable { viewModel.toggleLanguage() }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .testTag("btn_toggle_language")
+                    ) {
+                        Text(
+                            text = currentLanguage.flag,
+                            color = CyberCyan,
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold

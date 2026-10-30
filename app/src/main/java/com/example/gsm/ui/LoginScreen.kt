@@ -66,8 +66,13 @@ import com.example.ui.theme.TechAmber
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 
+import androidx.compose.foundation.clickable
+import com.example.gsm.model.AppLanguage
+
 @Composable
 fun LoginScreen(
+    currentLanguage: AppLanguage = AppLanguage.SWAHILI,
+    onToggleLanguage: (() -> Unit)? = null,
     onLoginSuccess: (String) -> Unit,
     errorMessage: String? = null
 ) {
@@ -134,13 +139,38 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 4.dp)
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                if (onToggleLanguage != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(GsmSurfaceElevated)
+                            .border(1.dp, CyberCyan.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .clickable { onToggleLanguage() }
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .testTag("btn_login_toggle_language")
+                    ) {
+                        Text(
+                            text = "${currentLanguage.flag} • ${currentLanguage.label}",
+                            color = CyberCyan,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = passwordInput,
                     onValueChange = { passwordInput = it },
-                    label = { Text("Weka Password ya Zana") },
-                    placeholder = { Text("Nenosiri la Fundi") },
+                    label = { 
+                        Text(if (currentLanguage == AppLanguage.ENGLISH) "Enter Technician Password" else "Weka Password ya Zana") 
+                    },
+                    placeholder = { 
+                        Text(if (currentLanguage == AppLanguage.ENGLISH) "Technician Master Key" else "Nenosiri la Fundi") 
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.VpnKey,
@@ -231,7 +261,7 @@ fun LoginScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Ingia Kwenye Zana",
+                            text = if (currentLanguage == AppLanguage.ENGLISH) "Access Technician Suite" else "Ingia Kwenye Zana",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             letterSpacing = 0.5.sp

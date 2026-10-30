@@ -50,10 +50,23 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
     private val _atInput = MutableStateFlow("AT")
     val atInput: StateFlow<String> = _atInput.asStateFlow()
 
+    private val _currentLanguage = MutableStateFlow(com.example.gsm.model.AppLanguage.SWAHILI)
+    val currentLanguage: StateFlow<com.example.gsm.model.AppLanguage> = _currentLanguage.asStateFlow()
+
     init {
-        addLog(LogLevel.INFO, "SYSTEM", "MSSUMY GSM PRO v6.0 - Mfumo wa Hardware umewashwa.")
-        addLog(LogLevel.INFO, "OTG", "Kikaguzi cha USB Host/OTG kiko tayari kutambua simu...")
+        addLog(LogLevel.INFO, "SYSTEM", "MSSUMY GSM PRO v6.0 - Hardware engine active / Mfumo wa Hardware umewashwa.")
+        addLog(LogLevel.INFO, "OTG", "USB Host/OTG detector ready / Kikaguzi cha USB Host kiko tayari...")
         refreshDevices()
+    }
+
+    fun toggleLanguage() {
+        _currentLanguage.value = if (_currentLanguage.value == com.example.gsm.model.AppLanguage.SWAHILI) {
+            com.example.gsm.model.AppLanguage.ENGLISH
+        } else {
+            com.example.gsm.model.AppLanguage.SWAHILI
+        }
+        val lang = _currentLanguage.value
+        addLog(LogLevel.INFO, "LOCALE", "Language switched to: ${lang.label} (${lang.flag})")
     }
 
     fun verifyPassword(password: String): Boolean {
