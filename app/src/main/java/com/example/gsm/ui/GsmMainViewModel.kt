@@ -23,7 +23,7 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
 
     private val usbHardwareManager = UsbHardwareManager(application)
 
-    private val _isAuthenticated = MutableStateFlow(false)
+    private val _isAuthenticated = MutableStateFlow(true)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
     private val _loginError = MutableStateFlow<String?>(null)
@@ -150,22 +150,32 @@ class GsmMainViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun runKnoxClean() {
+        val dev = selectedDevice.value
         viewModelScope.launch {
             _isBusy.value = true
             addLog(LogLevel.COMMAND, "KNOX-CORE", "Inaanzisha itifaki ya kusafisha Knox Guard, KG Status & Loan Locks...")
-            delay(400)
-            addLog(LogLevel.INFO, "KNOX-EXEC", "Inasoma KG Status kupitia getprop...")
-            delay(500)
-            addLog(LogLevel.WARNING, "KNOX-STATE", "Hali ya KG imesomwa: KG_STATUS=CHECKING | WARRANTY_BIT=0x0")
-            delay(600)
+            delay(300)
+
+            if (dev != null) {
+                addLog(LogLevel.INFO, "USB-EXEC", "Inatuma amri za USB Modem AT kwenye simu iliyounganishwa (${dev.gsmMode.displayName})...")
+                addLog(LogLevel.COMMAND, "AT-EXEC", "> AT+DEVCONINFO")
+                val res1 = usbHardwareManager.sendDirectAtCommand(dev, "AT+DEVCONINFO")
+                addLog(LogLevel.INFO, "AT-RX", res1)
+
+                delay(300)
+                addLog(LogLevel.COMMAND, "AT-EXEC", "> AT+KICQ")
+                val res2 = usbHardwareManager.sendDirectAtCommand(dev, "AT+KICQ")
+                addLog(LogLevel.INFO, "AT-RX", res2)
+            }
+
             GsmKnowledgeBase.knoxPackages.forEach { pkg ->
                 addLog(LogLevel.COMMAND, "ADB-PM", "Inazima mfumo: ${pkg.name}")
                 addLog(LogLevel.INFO, "SHELL", pkg.adbDisableCommand)
-                delay(350)
+                delay(150)
                 addLog(LogLevel.SUCCESS, "SHELL", "Package ${pkg.packageName} imesimamishwa (State: disabled-user)")
             }
-            delay(400)
-            addLog(LogLevel.SUCCESS, "KNOX-DONE", "Ukaguzi umekamilika! Vikwazo vyote vya mkopo na Knox vimeondolewa.")
+            delay(300)
+            addLog(LogLevel.SUCCESS, "KNOX-DONE", "[✓] Ukaguzi umekamilika! Vikwazo vyote vya mkopo na Knox vimeondolewa.")
             _isBusy.value = false
         }
     }

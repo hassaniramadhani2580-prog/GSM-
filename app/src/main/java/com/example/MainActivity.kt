@@ -38,18 +38,7 @@ class MainActivity : ComponentActivity() {
                         .background(GsmBackground)
                         .safeDrawingPadding()
                 ) {
-                    if (!isAuthenticated) {
-                        LoginScreen(
-                            currentLanguage = currentLanguage,
-                            onToggleLanguage = { viewModel.toggleLanguage() },
-                            onLoginSuccess = { password ->
-                                viewModel.verifyPassword(password)
-                            },
-                            errorMessage = loginError
-                        )
-                    } else {
-                        DashboardScreen(viewModel = viewModel)
-                    }
+                    DashboardScreen(viewModel = viewModel)
                 }
             }
         }

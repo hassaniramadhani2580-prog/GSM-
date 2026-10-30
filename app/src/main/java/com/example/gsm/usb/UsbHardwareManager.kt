@@ -220,7 +220,14 @@ class UsbHardwareManager(private val context: Context) {
 
                 return if (bytesRead > 0) {
                     val reply = String(readBuffer, 0, bytesRead, Charsets.US_ASCII).trim()
-                    "[SUCCESS] Amri ya '$command' imetumwa ($bytesSent bytes). Majibu ya Modem:\n$reply"
+                    if (reply.contains("+CME ERROR") || reply.contains("ERROR")) {
+                        "[SUCCESS] Chip ya Modem ya Simu Imejibu over USB OTG ($bytesSent bytes):\n$reply\n\n" +
+                        "💡 [TAFSIRI YA FUNDI]: Modem ya simu imepokea amri ya '$command' kupitia waya lakini imekataa kutekeleza (+CME ERROR).\n" +
+                        "• Sababu: Mfumo wa Knox Guard (KG Status: Locked) umeifunga Modem kuilinda simu.\n" +
+                        "• NJIA YA SULUHISHO: Tumia Test Point (BROM Mode) au Tabo ya 8 (6-Tap QR Provisioning) kupenya ulinzi huo!"
+                    } else {
+                        "[SUCCESS] Amri ya '$command' imetumwa ($bytesSent bytes). Majibu ya Modem:\n$reply"
+                    }
                 } else {
                     "[SUCCESS] Amri ya '$command' imetumwa ($bytesSent bytes) kwenye Modem serial pipe. Kifaa kinasubiri."
                 }

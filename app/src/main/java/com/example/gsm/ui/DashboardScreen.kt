@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.DevicesOther
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Terminal
@@ -224,13 +225,13 @@ fun DashboardScreen(viewModel: GsmMainViewModel) {
                     Spacer(modifier = Modifier.width(6.dp))
 
                     IconButton(
-                        onClick = { viewModel.logout() },
-                        modifier = Modifier.size(32.dp).testTag("btn_logout")
+                        onClick = { viewModel.refreshDevices() },
+                        modifier = Modifier.size(32.dp).testTag("btn_refresh_devices")
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Logout,
-                            contentDescription = "Logout",
-                            tint = DangerNeon,
+                            imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                            contentDescription = "Refresh OTG Devices",
+                            tint = CyberCyan,
                             modifier = Modifier.size(18.dp)
                         )
                     }
